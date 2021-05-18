@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#cnv
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="tools.js"></script>
+		<script src="ball.js"></script>
+		<script>
+			// 实现球体投掷的效果，鼠标抓取小球，往外一扔，球体按照松开前的速度 被投掷出去。
+			// 在画布中心画一个小球
+			// 添加鼠标按下事件，在其中添加 鼠标拖拽 与 松开 事件
+			// 按下事件中，记录 球体原来的位置; 并记录鼠标 与 球体圆心之间的距离；
+			// 拖拽事件中，将 鼠标位置 赋予 球体(利用鼠标与球体圆心之间的距离)；
+			// 并计算 新老位置的差值作为 球体速度；当前鼠标位置 为 旧位置；
+			// 因为在动画帧与帧之间，拖拽过程中，前后两次球体位置的差值就是它的速度；当前位置变为旧位置，是相对于下一次的。
+			// 松开事件中，解除 松开事件 与 拖拽事件的监听，并且将标志位 置为 true；
+			// 绘图，判断标志位，为true的话， 球体 位置 累加差值，并绘图
+			// 边界检测
+			// 加上重力影响
+			// 加上弹性系数影响
+			// 加上 地面摩擦系数影响
+			window.onload = function()
+			{
+				function $$(id)
+				{
+					return document.getElementById(id);
+				}
+				var cnv = $$("cnv");
+				var cxt = cnv.getContext("2d");
+				var ball = new Ball(20,tools.getRandomColor(),cnv.width/2,cnv.height/2);
+				var mouse = tools.getMouse(cnv);
+				var isMouseUp = false;
+				var gravity = 0.15;
+				var bounce_y = 0.8;
+				var bounce_x = 0.9;
+				var friction = 0.95;
+				var oldX = 0;
+				var oldY = 0;
+				var dx = 0;
+				var dy = 0;
+				
+				
+				window.addEventListener("mousedown",function(mouse){
+					if(ball.checkMouse(mouse))
+					{
+						oldX = mouse.x;
+						oldY = mouse.y;
+						dx = mouse.x - ball.x;
+						dy = mouse.y - ball.y;
+						window.addEventListener("mousemove",onMouseMove,false);
+						window.addEventListener("mouseup",onMouseUp,false);
+						function onMouseMove(mouse)
+						{
+							ball.x = mouse.x - dx;
+							ball.y = mouse.y - dy;
+							ball.vx = mouse.x - oldX;
+							ball.vy = mouse.y - oldY;
+							oldX = mouse.x;
+							oldY = mouse.y;
+						}
+						function onMouseUp(mouse)
+						{
+							isMouseUp = true;
+							window.removeEventListener("mouseup",onMouseUp,false);
+							window.removeEventListener("mousemove",onMouseMove,false);
+						}
+					}
+				},false);
+				
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt.clearRect(0,0,cnv.width,cnv.height);
+					cxt.beginPath();
+					
+					ball.fill(cxt);
+					if(isMouseUp)
+					{
+						ball.x += ball.vx;
+						ball.y += ball.vy;
+						ball.vy += gravity;
+					}
+					if(ball.x < ball.r)
+					{
+						ball.x = ball.r;
+						ball.vx *= -bounce_x;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.x > cnv.width - ball.r)
+					{
+						ball.x = cnv.width - ball.r;
+						ball.vx *= -bounce_x;
+						ball.color = tools.getRandomColor();
+					}
+					if(ball.y < ball.r)
+					{
+						ball.y = ball.r;
+						ball.vy *= -bounce_y;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.y > cnv.height - ball.r)
+					{
+						ball.y = cnv.height - ball.r;
+						ball.vy *= -bounce_y;
+						ball.vx *= friction;
+						ball.vy *= friction;
+						ball.color = tools.getRandomColor();
+					}
+				})();
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="cnv" width="1200px" height="400px"></canvas>
+	</body>
+</html>

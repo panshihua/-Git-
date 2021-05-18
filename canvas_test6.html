@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#canvas1
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="ball.js"></script>
+		<script src="tools.js"></script>
+		<script>
+			// 捕获 运动中的小球，并且支持拖拽，松开时，按照原来的速度 进行运动。
+			// 实例化一个小球，位置、速度、方向、颜色随机，边界检测，画出来；
+			// 添加一个 鼠标按下的 事件监听，在其中 检测 鼠标是否在球的范围中，是的话 标志位为true，默认为 false；
+			// 在 绘制过程中，判断标志位，true的话，小球停止移动；false的话，小球继续移动；
+			// 被 捕获的球的 事件中，添加 拖拽 与 松开的 监听事件；
+			// 拖拽事件中，使 球体位置 随着鼠标的位置移动；
+			// 松开事件中，使 标志位 置为 false，解除 松开事件 与 拖拽事件的监听；
+			window.onload = function()
+			{
+				function $$(id)
+				{
+					return document.getElementById(id);
+				}
+				function createBall()
+				{
+					var ball = new Ball(20,tools.getRandomColor());
+					ball.x = Math.random() * (cnv.width - 30) + 15;
+					ball.y = Math.random() * (cnv.height - 30) + 15;
+					ball.vx = Math.random() * 4 - 2;
+					ball.vy = Math.random() * 4 - 2;
+					return ball;
+				}
+				var cnv = $$("canvas1");
+				var cxt = cnv.getContext("2d");
+				var ball = createBall();
+				var isMouseDown = false;
+				var mouse = tools.getMouse(cnv);
+				var dx = 0;
+				var dy = 0;
+				
+				
+				window.addEventListener("mousedown",function(mouse){
+					if(ball.checkMouse(mouse))
+					{
+						isMouseDown = true;
+						dx = mouse.x - ball.x;
+						dy = mouse.y - ball.y;
+						window.addEventListener("mousemove",onMouseMove,false);
+						window.addEventListener("mouseup",onMouseUp,false);
+					}
+				},false);
+				function onMouseMove(mouse)
+				{
+					ball.x = mouse.x - dx;
+					ball.y = mouse.y - dy;
+				}
+				function onMouseUp()
+				{
+					isMouseDown = false;
+					window.removeEventListener("mouseup",onMouseUp,false);
+					window.removeEventListener("mousemove",onMouseMove,false);
+				}
+				
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt.clearRect(0,0,cnv.width,cnv.height);
+					cxt.beginPath();
+					
+					ball.fill(cxt);
+					if(!isMouseDown)
+					{
+						ball.x += ball.vx;
+						ball.y += ball.vy;
+					}
+					
+					if(ball.x < ball.r)
+					{
+						ball.x = ball.r;
+						ball.vx *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.x > cnv.width - ball.r)
+					{
+						ball.x = cnv.width - ball.r;
+						ball.vx *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					if(ball.y < ball.r)
+					{
+						ball.y = ball.r;
+						ball.vy *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.y > cnv.height - ball.r)
+					{
+						ball.y = cnv.height - ball.r;
+						ball.vy *= -1;
+						ball.color = tools.getRandomColor();
+					}
+				})();
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas1" width="400px" height="400px"></canvas>
+	</body>
+</html>

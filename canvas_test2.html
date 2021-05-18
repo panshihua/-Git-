@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#canvas1,#canvas2,#canvas3,#canvas4,#canvas5,#canvas6,#canvas7,#canvas8,#canvas9,#canvas10,#canvas11,
+			#canvas12,#canvas13,#canvas14,#canvas15,#canvas16,#canvas17,#canvas18,#canvas19
+			{
+				border: 1px solid orange;
+			}
+			#img1
+			{
+				display: none;
+			}
+			#btn1
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 1100px;
+				font-size: 20px;
+			}
+			#btn2
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 50px;
+				font-size: 20px;
+			}
+			#btn3
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 100px;
+				font-size: 20px;
+			}
+			#btn4
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 200px;
+				font-size: 20px;
+			}
+			#btn5
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 200px;
+				font-size: 20px;
+			}
+			#btn6
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 100px;
+				font-size: 20px;
+			}
+			#btn7
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 50px;
+				font-size: 20px;
+			}
+			#btn8
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 100px;
+				font-size: 20px;
+			}
+			#btn9
+			{
+				width: 100px;
+				height: 50px;
+				margin-left: 200px;
+				font-size: 20px;
+			}
+		</style>
+		<script>
+			window.onload = function()
+			{
+				var oCanvas = document.getElementById("canvas1");
+				var cxt1 = oCanvas.getContext("2d");
+				cxt1.strokeStyle = "yellow";
+				cxt1.fillStyle = "orange";
+				//画一个整圆，参数为圆心位置、半径、起始角度、终止角度；还有一个参数，默认false 顺时针转。
+				cxt1.arc(100,100,100,0,360*Math.PI/180);
+				cxt1.fill();
+				cxt1.stroke();
+				// beginPath() 路径方法，此为开辟一条新路径；不管之前路径是否闭合；也不会覆盖之前线条的设置
+				//总之就是开辟一条新路径，与前面的没有关系了。
+				cxt1.beginPath();
+				cxt1.strokeStyle = "#FFA500";
+				//圆心位置、半径、开始角度、结束角度、逆时针旋转；此处路径没有闭合，画的是弧线；
+				cxt1.arc(300,100,80,0,120*Math.PI/180,true);
+				cxt1.stroke();
+				//开辟新路径
+				cxt1.beginPath();
+				cxt1.strokeStyle = "aqua";
+				cxt1.fillStyle = "chartreuse";
+				cxt1.arc(100,200,90,0,120*Math.PI/180);
+				//路径闭合(封闭)，但是可能并未结束；只有 beginPath()方法才能确定 路径结束；
+				cxt1.closePath();
+				cxt1.fill();
+				cxt1.stroke();
+				
+				var oCanvas2 = document.getElementById("canvas2");
+				var cxt2 = oCanvas2.getContext("2d");
+				cxt2.strokeStyle = "red";
+				cxt2.moveTo(100,100);
+				//参数分别为控制点、结束点、半径；由这三个就可以画出弧线了，剩下的起点就会由弧线的切线连接起来；
+				//控制点与结束点连线的垂直方向为圆心所在，根据半径就可确定两个圆心位置，然后起点位置决定最终圆心位置，弧线成
+				cxt2.arcTo(200,50,300,200,200);
+				cxt2.stroke();
+				
+				cxt2.beginPath();
+				cxt2.strokeStyle = "#FFA500";
+				cxt2.fillStyle = "yellow";
+				//自定义一个 画四个角为弧线的 矩形；参数分别为cxt、矩形宽和高、弧线半径、矩形左上角的坐标；
+				drawRadiusBorderRect(cxt2,200,100,20,300,50);
+				cxt2.fill();
+				cxt2.stroke();
+				
+				function drawRadiusBorderRect(cxt,width,height,r,offsetX,offsetY)
+				{
+					cxt.moveTo(offsetX+r,offsetY);
+					cxt.arcTo(offsetX+width,offsetY,offsetX+width,offsetY+r,r);
+					cxt.arcTo(offsetX+width,offsetY+height,offsetX+width-r,offsetY+height,r);
+					cxt.arcTo(offsetX,offsetY+height,offsetX,offsetY+height-r,r);
+					cxt.arcTo(offsetX,offsetY,offsetX+r,offsetY,r);
+					//上一个线的末端点 是 下一个线的起点，整体连接起来。
+					cxt.closePath();
+				}
+				
+				//自定义一个画扇形的函数，参数分别为：cxt、圆心位置、半径、开始角度、结束角度、填充的颜色；
+				drawSector(cxt2,400,300,100,0,60*Math.PI/180,"yellow");
+				drawSector(cxt2,400,300,100,60*Math.PI/180,80*Math.PI/180,"red");
+				drawSector(cxt2,400,300,100,80*Math.PI/180,120*Math.PI/180,"orange");
+				drawSector(cxt2,400,300,100,120*Math.PI/180,250*Math.PI/180,"green");
+				drawSector(cxt2,400,300,100,250*Math.PI/180,360*Math.PI/180,"blue");
+				
+				function drawSector(cxt,centerX,centerY,r,startAngle,endAngle,color)
+				{
+					cxt.beginPath();
+					cxt.fillStyle = color;
+					//让圆心作为起点，画出弧线后，整体连接起来，成为扇形。
+					cxt.moveTo(centerX,centerY);
+					cxt.arc(centerX,centerY,r,startAngle,endAngle);
+					cxt.closePath();
+					cxt.fill();
+				}
+				
+				var oCanvas3 = document.getElementById("canvas3");
+				var cxt3 = oCanvas3.getContext("2d");
+				cxt3.strokeStyle = "#FFA500"
+				cxt3.moveTo(100,100);
+				//绘制 二次贝塞尔曲线，参数分别为：控制点坐标、结束点坐标；
+				//控制点与结束点的连线 确定了那一处的弧度；然后控制点与开始点之间的连线 确定了那一处的弧度；
+				//然后 开始点与结束点之间的弧线 是均匀的变化，这个就是 二次贝塞尔曲线。
+				cxt3.quadraticCurveTo(150,300,200,150);
+				cxt3.stroke();
+				
+				cxt3.beginPath();
+				cxt3.strokeStyle = "aqua"
+				cxt3.moveTo(300,100);
+				//绘制 三次贝塞尔曲线，参数分别为：控制点坐标1、控制点坐标2、结束点坐标；
+				//绘制过程与二次的类似，坐标1与开始点产生一个弧度，坐标2与结束点产生一个弧度；两个弧度之间分布均匀连接起来。
+				cxt3.bezierCurveTo(400,140,100,250,100,300);
+				cxt3.stroke();
+				
+				var oCanvas4 = document.getElementById("canvas4");
+				var cxt4 = oCanvas4.getContext("2d");
+				cxt4.strokeStyle = "darkorange"
+				//定义线宽、线帽样式、线条交接处的样式。
+				cxt4.lineWidth = 20;
+				cxt4.lineCap = "round";
+				cxt4.lineJoin = "round"
+				cxt4.moveTo(100,100);
+				cxt4.lineTo(400,50);
+				cxt4.lineTo(450,250);
+				cxt4.lineTo(420,300);
+				cxt4.lineTo(250,350);
+				cxt4.lineTo(200,200);
+				cxt4.closePath();
+				cxt4.stroke();
+				
+				var oCanvas5 = document.getElementById("canvas5");
+				var cxt5 = oCanvas5.getContext("2d");
+				cxt5.strokeStyle = "orange";
+				cxt5.fillStyle = "yellow";
+				var text = "天下风云出我辈";
+				//定义文本的格式，下面这三种是固定顺序，依次为：字体宽度、大小、格式。
+				cxt5.font = "bold 100px 微软雅黑" ;
+		//添加描边文本，参数为：文本、文本起点横坐标、文本基线纵坐标、最大宽度（若文本超出最大宽度，则相应压缩至最大宽度）
+				cxt5.strokeText(text,100,100,300);
+				//添加填充文本，参数为：文本、文本起点横坐标、文本基线纵坐标、最大宽度。
+				cxt5.fillText(text,100,100,300);
+				cxt5.stroke();
+				cxt5.fill();
+				
+				cxt5.beginPath();
+				cxt5.strokeStyle = "yellow";
+				cxt5.fillStyle = "#FFA500";
+				var text1 = "一入江湖岁月催";
+				cxt5.font = "bold 50px 微软雅黑";
+				//获取文本的正常宽度；
+				var length = cxt5.measureText(text1).width;
+				//设置文本起点的 横坐标：元素宽度一半 减去 文本宽度一半；从而使文本水平居中。不用压缩了。
+				var Xposition = oCanvas5.width/2 - length/2;
+				// 不带最大宽度的参数了，意味着没有压缩。
+				cxt5.strokeText(text1,Xposition,250);
+				cxt5.fillText(text1,Xposition,250);
+				cxt5.stroke();
+				cxt5.fill();
+				
+				var oCanvas6 = document.getElementById("canvas6");
+				var cxt6 = oCanvas6.getContext("2d");
+				//画图片，先载入图片对象，设置图片的 来源属性；在图片对象加载事件完成之后，画图；
+				var image1 = new Image();
+				image1.src = "../website1/baby30.jpg";
+				image1.onload = function()
+				{
+					//画图实现，参数分别为：图片对象、canvas中图片左上角坐标；
+					cxt6.drawImage(image1,30,30);
+					//参数分别为：图片对象、canvas中图片左上角坐标、图片的宽高（支持图片的缩放）。
+					cxt6.drawImage(image1,120,30,200,200);
+				}
+				var image2 = new Image();
+				image2.src = "../website1/baby14.jpg";
+				image2.onload = function()
+				{
+					//参数分别为: 图片对象、图片需要裁剪的横纵坐标、图片宽高、canvas中图片左上角坐标、图片的宽高
+					cxt6.drawImage(image2,50,0,250,300,50,250,250,300);
+				}
+				//图片对象的引入除了上面的方式外，还可以在DOM中定位 来 获得，然后进行画图。
+				var oImg1 = document.getElementById("img1");
+				cxt6.drawImage(oImg1,0,0,300,250,350,30,300,250);
+				
+				var oCanvas7 = document.getElementById("canvas7");
+				var cxt7 = oCanvas7.getContext("2d");
+				cxt7.strokeStyle = "yellow";
+				cxt7.arc(250,200,150,0,360*Math.PI/180);
+				cxt7.stroke();
+				//图片用画出的自定义形状 来 裁剪；上面为画出的封闭图形；然后clip()方法裁剪；然后画图，图片会只显示图形裁剪的部分
+				//当然 相对位置要 算好。
+				cxt7.clip();
+				var image3 = new Image();
+				image3.src = "../website1/baby34.jpg";
+				image3.onload = function()
+				{
+					cxt7.drawImage(image3,100,50);
+				}
+				
+				var oCanvas8 = document.getElementById("canvas8");
+				var cxt8 = oCanvas8.getContext("2d");
+				cxt8.fillStyle = "orange";
+				cxt8.arc(100,100,100,0,360*Math.PI/180);
+				cxt8.fill();
+				//图画上之后，调用平移的方法，分别向右与向下 移动200 
+				cxt8.translate(200,200);
+				//平移完之后，需要重新绘制，每次更新都是重画，重画的时候还是原来的设置；状态(平移)在前，动作(画图)在后
+				cxt8.arc(100,100,100,0,360*Math.PI/180);
+				cxt8.fill();
+				//但是有个问题：重绘之后，原来的图还保留着，想要清除原来的图，则需要在重新绘制之前 清空 canvas区域，见下：
+				
+				var oBtn1 = document.getElementById("btn1");
+				var oCanvas9 = document.getElementById("canvas9");
+				var cxt9 = oCanvas9.getContext("2d");
+				cxt9.fillStyle = "#FFA500";
+				cxt9.arc(100,100,100,0,360*Math.PI/180);
+				cxt9.fill();
+				oBtn1.onclick = function()
+				{
+					//清空整个 canvas区域，之后重新绘制。
+					cxt9.clearRect(0,0,oCanvas9.width,oCanvas9.height);
+					cxt9.translate(100,100);
+					//重新开辟新路径，不能与之前的图 有联系。
+					cxt9.beginPath();
+					cxt9.arc(100,100,100,0,360*Math.PI/180);
+					cxt9.fill();
+				}
+				
+				var oBtn2 = document.getElementById("btn2");
+				var oBtn3 = document.getElementById("btn3");
+				var oCanvas10 = document.getElementById("canvas10");
+				var cxt10 = oCanvas10.getContext("2d");
+				cxt10.fillStyle = "yellow";
+				//设置 图形重合时 的 显示模式，此为：重叠部分颜色值相加，其余部分正常显示。
+				cxt10.globalCompositeOperation ="lighter";
+				cxt10.arc(50,50,50,0,360*Math.PI/180);
+				cxt10.fill();
+				oBtn2.onclick = function()
+				{
+					//图形 缩放加平移，新开路径，画原图；
+					cxt10.scale(1.5,1.5);
+					cxt10.translate(50,50);
+					cxt10.beginPath();
+					cxt10.fillStyle = "yellowgreen";
+					cxt10.arc(50,50,50,0,360*Math.PI/180);
+					cxt10.fill();
+				}
+				oBtn3.onclick = function()
+				{
+					cxt10.scale(0.5,0.5);
+					cxt10.translate(100,100);
+					cxt10.beginPath();
+					cxt10.fillStyle = "red";
+					cxt10.arc(50,50,50,0,360*Math.PI/180);
+					cxt10.fill();
+				}
+				
+				var oBtn4 = document.getElementById("btn4");
+				var oCanvas11 = document.getElementById("canvas11"); 
+				var cxt11 = oCanvas11.getContext("2d");
+				cxt11.fillStyle = "#FFA500"
+				cxt11.arc(300,300,50,0,360*Math.PI/180);
+				cxt11.fill();
+				oBtn4.onclick = function()
+				{
+					//图形 旋转，参数为旋转的度数，默认绕画布的原点旋转，正数顺时针，负数逆时针；
+					cxt11.rotate(10*Math.PI/180);
+					cxt11.scale(0.8,0.8);
+					//状态设置完毕，画原图：
+					cxt11.beginPath();
+					cxt11.fillStyle = "yellowgreen"
+					cxt11.arc(300,300,50,0,360*Math.PI/180);
+					cxt11.fill();
+				}
+				
+				var oCanvas12 = document.getElementById("canvas12");
+				var oBtn5 = document.getElementById("btn5");
+				var oBtn6 = document.getElementById("btn6");
+				var rectWidth = 200;
+				var rectHeight = 200;
+				var i = 0;
+				var timer = null;
+				var Xposition = oCanvas12.width/2 - rectWidth/2;
+				var Yposition = oCanvas12.height/2 - rectHeight/2;
+				var cxt12 = oCanvas12.getContext("2d");
+				cxt12.fillStyle = "yellowgreen";
+				//使 图形的中心 与 画布的中心一致
+				cxt12.fillRect(Xposition,Yposition,rectWidth,rectHeight);
+				//设置定时器，点击旋转之后，开始角度累加 旋转，每次都需要重新绘制，绘制之前清空画布。
+				oBtn5.onclick = function()
+				{
+					clearInterval(timer);
+					timer = setInterval(rorateRect,1);
+					function rorateRect()
+					{
+						i++;
+						cxt12.clearRect(0,0,oCanvas12.width,oCanvas12.height);
+						//保存当前的空状态
+						cxt12.save();
+						//想要图形绕着自己的中心进行旋转，则需要图形平移，即将原点的坐标平移至画布的中心位置
+						cxt12.translate(oCanvas12.width/2,oCanvas12.height/2);
+						cxt12.rotate(i*Math.PI/180);
+						cxt12.beginPath();
+						cxt12.fillStyle = "yellowgreen";
+						//将画的矩形 调整其左上角坐标，使自身中心与 画布的中心重合，这样旋转就围绕着自身中心了。
+						cxt12.fillRect(-Xposition,-Yposition,rectWidth,rectHeight);
+						//恢复之前保存的 空状态。
+						cxt12.restore();
+					}
+				}
+				oBtn6.onclick = function()
+				{
+					clearInterval(timer);
+					i = 0;
+				}
+				
+				
+				
+				//实现 被裁剪的图片，以自身中心为原点 旋转：
+				var oCanvas13 = document.getElementById("canvas13");
+				var oBtn7 = document.getElementById("btn7");
+				var oBtn8 = document.getElementById("btn8");
+				var timer1 = null;
+				var j = 0;
+				var cxt13 = oCanvas13.getContext("2d");
+				cxt13.strokeStyle = "yellow";
+				cxt13.arc(200,200,150,0,360*Math.PI/180);
+				cxt13.stroke();
+				//图片用画出的自定义形状 来 裁剪；上面为画出的封闭图形；然后clip()方法裁剪；然后画图，图片会只显示图形裁剪的部分
+				//当然 相对位置要 算好。
+				cxt13.clip();
+				var image4 = new Image();
+				image4.src = "../website1/baby34.jpg";
+				image4.onload = function()
+				{
+					cxt13.drawImage(image4,50,50);
+				}
+				oBtn7.onclick = function()
+				{
+					clearInterval(timer1);
+					timer1 = setInterval(rorateImage,20);
+					function rorateImage()
+					{
+						j++;
+						cxt13.clearRect(0,0,oCanvas13.width,oCanvas13.height);
+						//save 保存的是上面的状态，意思就是保存一个空状态；等 restore 执行时就会恢复到这个空状态；
+						// 原因是 要执行 图形的变形时，是累加模式的，即图形变形时是参考上一个图形；
+						//而不是参考原点，所以为了消除这种效应，需要每次都恢复到最初的空白状态中，能消除这种影响。
+						cxt13.save();
+						// 每次restore 恢复， 都会恢复到 最初的状态：原点在画布左上角；图片没有旋转任何角度
+						cxt13.translate(oCanvas13.width/2,oCanvas13.height/2);
+						cxt13.rotate(j*Math.PI/180);
+						
+						//只是 clearRect 清空画布，不能清除裁剪的区域，即裁剪的区域依然有效；
+						// 要是想消除 裁剪的影响，就需要在裁剪没有执行前，保存状态；届时恢复状态就消除了裁剪的影响。
+						//所以不需要重新绘制裁剪的区域，只是将坐标系的原点平移至画布中心，设置旋转，依然绕原点旋转；
+						//使图片的中心 与 原点重合 就可实现图片绕自身中心旋转了。
+						
+						//画图，图片的左上角 相对于原点 为 (-150,-150)。保证图片中心与原点 重合。
+						//因为上面 图片已经加载出来了，所以只需要重绘一遍即可。
+						cxt13.drawImage(image4,-150,-150);
+						cxt13.restore();
+						// 综上所述：canvas状态的保存和恢复，主要用于图形或图片的裁剪、图形或图片的变形；
+						//可以在 重绘的时候，是在一片空白(也就是刚开始的状态)中进行，相当于初始化；分场景使用。
+						//画图的时候要是依赖前面的变化，则不需要 保存与恢复；要是需要初始化，则需要 保存与恢复。
+						//clear 只是 清空画布，但是不会恢复到初始化状态，前面的影响还在。
+						// 保存与恢复 ，保存不一定是保存空白状态，而是保存它上面的那种状态
+						// 保存图形或图片变形前的状态，即 原点在画布左上角；图片没有旋转任何角度
+						// 这样每次累加与上一次的差值 都是一个定值，保证了匀速转动
+						// 两种实现方式，第一种是上面这种；
+						// 第二种方式是：将平移 移至 点击事件后的第一句，即不在定时语句中；
+			// 定时语句：取消状态的保存与恢复，然后 旋转角度设置为固定值，这样它就会以上一次的角度为参考进行匀速旋转。
+			// 但是第二种 有致命缺陷：就是点击旋转按钮两次，会平移两次，就出框了，bug 无解，不能用这个；
+					}
+				}
+				oBtn8.onclick = function()
+				{
+					clearInterval(timer1);
+					j = 0;
+					//状态要在动作前，清除原图用clear，重绘用beginPath 加原图，善用save与restore；
+					//translate 平移其实是平移的坐标系，如上：平移到画布宽高的一半，相当于(0,0)原点平移到了宽高的一半处。
+					//scale 缩放，其边框也跟着缩放；缩放参考的是其左上角坐标；
+					//rotate 旋转，默认绕着 原点旋转；要让其绕着图形中心旋转，需要让图形中心与原点重合，所以就需要
+				    //translate 配合，将原点平移到画布中来；然后画图的时候将图形的中心与原点重合，即可实现中心旋转。
+				}
+				
+				
+				var oCanvas14 = document.getElementById("canvas14");
+				var cxt14 = oCanvas14.getContext("2d");
+				cxt14.translate(220,0);
+				cxt14.fillStyle = "rgba(250,0,50,0.25)";
+				for(var i=0;i<100;i++)
+				{
+					//连续绘制一百个图，每个图都进行一下平移、缩放和旋转，状态设置好之后 执行画图动作；(原图)
+					cxt14.translate(25,25);
+					cxt14.scale(0.95,0.95);
+					cxt14.rotate(Math.PI/15);
+					cxt14.fillRect(0,0,200,100);
+				}
+				
+				var oCanvas15 = document.getElementById("canvas15");
+				var cxt15 = oCanvas15.getContext("2d");
+				var colors = ["red","orange","yellow","green","blue","navy","purple"];
+				cxt15.lineWidth = 20;
+				for(var i=0;i<colors.length;i++)
+				{
+					//画彩虹，循环七次，每次开辟新路径、设置颜色、平移，设置完毕后 画原图。
+					cxt15.beginPath();
+					cxt15.strokeStyle = colors[i];
+					cxt15.translate(0,20);
+					cxt15.arc(225,400,350,0,Math.PI,true);
+					cxt15.stroke();
+				}
+				
+				var oCanvas16 = document.getElementById("canvas16");
+				var cxt16 = oCanvas16.getContext("2d");
+				var image5 = new Image();
+				image5.src = "../website1/baby34.jpg";
+				image5.onload = function()
+				{
+					cxt16.drawImage(image5,10,10,200,200);
+					//获取图片像素信息，参数为：左上角坐标点位、图片的宽高
+					var imgData = cxt16.getImageData(10,10,200,200);
+					var data = imgData.data;
+					//图片的像素信息为一个数组，每4个数构成一组(rgba)，可以修改其像素值以达到图片的特定效果。
+					//数组是引用关系，所以修改 data之后，imgData数据也跟着变了；
+					for(var i=0;i<data.length;i+=4)
+					{
+						var a=50;
+						data[i+0] += a;
+						data[i+1] += a;
+						data[i+2] += a;
+						data[i+3] *= 0.5;
+					}
+					//将修改后的图片像素信息，输出到画布上，参数为：图片像素信息、左上角坐标点位。
+					cxt16.putImageData(imgData,250,10);
+				}
+				
+				cxt16.beginPath();
+				var text2 = "遥映人间冰雪样"
+				//创建线性渐变模式，参数分别为：渐变开始点的坐标、渐变结束点坐标；
+				//横坐标相同就是纵向渐变，纵坐标相同就是横向渐变，否则就是斜向渐变。
+				var gnt6 = cxt16.createLinearGradient(10,250,490,250)
+				//设置渐变模式中的 比例 与 颜色；
+				gnt6.addColorStop(0,"purple");
+				gnt6.addColorStop(0.3,"red");
+				gnt6.addColorStop(0.7,"orange");
+				gnt6.addColorStop(1,"yellow");
+				//将渐变模式 赋值给  填充类型
+				cxt16.fillStyle = gnt6;
+				cxt16.font = "bold 100px 微软雅黑";
+				cxt16.fillText(text2,10,350,480);
+				
+				var oCanvas17 = document.getElementById("canvas17");
+				var cxt17 = oCanvas17.getContext("2d");
+				//横向渐变
+				var gnt1 = cxt17.createLinearGradient(10,10,390,10);
+				gnt1.addColorStop(0,"yellow");
+				gnt1.addColorStop(0.3,"orange");
+				gnt1.addColorStop(0.7,"red");
+				gnt1.addColorStop(1,"purple");
+				cxt17.fillStyle = gnt1;
+				cxt17.fillRect(10,10,380,90);
+				
+				cxt17.beginPath();
+				//纵向渐变
+				var gnt2 = cxt17.createLinearGradient(10,110,10,200);
+				gnt2.addColorStop(0,"purple");
+				gnt2.addColorStop(0.3,"red");
+				gnt2.addColorStop(0.7,"orange");
+				gnt2.addColorStop(1,"yellow");
+				cxt17.fillStyle = gnt2;
+				cxt17.fillRect(10,110,380,90)
+				
+				cxt17.beginPath();
+				//斜向渐变
+				var gnt3 = cxt17.createLinearGradient(10,210,390,390);
+				gnt3.addColorStop(0,"purple");
+				gnt3.addColorStop(0.5,"red");
+				gnt3.addColorStop(1,"yellow");
+				cxt17.fillStyle = gnt3;
+				cxt17.fillRect(10,210,380,180);
+				
+				var oCanvas18 = document.getElementById("canvas18");
+				var cxt18 = oCanvas18.getContext("2d");
+				//创建径向渐变模式，参数分别为：开始渐变的圆(提供圆心与半径)、结束渐变的圆(提供圆心与半径)。
+				var gnt4 = cxt18.createRadialGradient(125,75,10,125,75,125);
+				//设置 渐变的位置比例 与 颜色。
+				gnt4.addColorStop(0,"white");
+				gnt4.addColorStop(1,"orange");
+				cxt18.fillStyle = gnt4;
+				cxt18.arc(100,100,100,0,360*Math.PI/180);
+				cxt18.fill();
+				
+				cxt18.beginPath();
+				var gnt5 = cxt18.createRadialGradient(300,100,0,300,100,100);
+				gnt5.addColorStop(0,"purple");
+				gnt5.addColorStop(0.25,"red");
+				gnt5.addColorStop(0.5,"orange");
+				gnt5.addColorStop(0.75,"yellow");
+				gnt5.addColorStop(1,"white");
+				cxt18.fillStyle = gnt5;
+				cxt18.arc(300,100,100,0,360*Math.PI/180);
+				cxt18.fill();
+				
+				cxt18.beginPath();
+				var image6 = new Image();
+				image6.src = "../website1/baby1.jpg";
+				image6.onload = function()
+				{
+					//设置阴影选项，分别为：横向偏移、纵向偏移、阴影颜色、阴影模糊值：值越小，越清晰；越大，越模糊、
+					cxt18.shadowOffsetX = 0;
+					cxt18.shadowOffsetY = 0;
+					cxt18.shadowColor = "#FFA500";
+					cxt18.shadowBlur = 100;
+					cxt18.drawImage(image6,50,202);
+				}
+				
+				
+				var oCanvas19 = document.getElementById("canvas19");
+				var oBtn9 = document.getElementById("btn9");
+				var text3 = "遥映人间冰雪样";
+				var cxt19 = oCanvas19.getContext("2d");
+				var gnt7 = cxt19.createLinearGradient(10,10,490,10);
+				gnt7.addColorStop(0,"purple");
+				gnt7.addColorStop(0.25,"red");
+				gnt7.addColorStop(0.5,"orangered");
+				gnt7.addColorStop(0.75,"orange");
+				gnt7.addColorStop(1,"yellow");
+				//设置 Canvas 环境 整体 的 透明度。
+				cxt19.globalAlpha = 0.7;
+				cxt19.fillStyle = gnt7;
+				cxt19.font = "bold 100px 微软雅黑";
+				cxt19.shadowOffsetX = 5;
+				cxt19.shadowOffsetY = -20;
+				cxt19.shadowColor = "orangered";
+				cxt19.shadowBlur = 50;
+				cxt19.fillText(text3,10,120,480);
+				oBtn9.onclick = function()
+				{
+					//将画布转换为 data URL ，存储的是图片的数据；
+					//两个用处：发送到Web服务器的数据库，进行长期保存；在浏览器中直接打开，进行本地保存。
+					window.location = oCanvas19.toDataURL("image/png");
+				}
+				
+			}
+			
+		</script>
+	</head>
+	<body>
+		<canvas width="500px" height="300px" id="canvas1"></canvas>
+		<canvas width="600px" height="400px" id="canvas2"></canvas>
+		<canvas id="canvas3" width="500px" height="400px"></canvas>
+		<canvas id="canvas4" width="500px" height="400px"></canvas>
+		<canvas id="canvas5" width="500px" height="400px"></canvas>
+		<canvas id="canvas6" width="800px" height="600px"></canvas>
+		<img id="img1" src="../website1/baby12.jpg" />
+		<canvas id="canvas7" width="500px" height="400px"></canvas>
+		<canvas id="canvas8" width="400px" height="400px"></canvas>
+		<canvas id="canvas9" width="400px" height="400px"></canvas><br />
+		<input id="btn1" type="button" value="移动" />
+		<canvas id="canvas10" width="400px" height="400px"></canvas>
+		<canvas id="canvas11" width="400px" height="400px"></canvas>
+		<canvas id="canvas12" width="400px" height="400px"></canvas><br />
+		<input id="btn2" type="button" value="放大" />
+		<input id="btn3" type="button" value="缩小" />
+		<input id="btn4" type="button" value="旋转" />
+		<input id="btn5" type="button" value="旋转" />
+		<input id="btn6" type="button" value="暂停" /><br />
+		<canvas id="canvas13" width="400px" height="400px"></canvas>
+		<canvas id="canvas14" width="450px" height="400px"></canvas>
+		<canvas id="canvas15" width="450px" height="400px"></canvas><br />
+		<input id="btn7" type="button" value="旋转" />
+		<input id="btn8" type="button" value="暂停" /><br />
+		<canvas id="canvas16" width="500px" height="400px"></canvas>
+		<canvas id="canvas17" width="400px" height="400px"></canvas>
+		<canvas id="canvas18" width="400px" height="400px"></canvas>
+		<canvas id="canvas19" width="500px" height="150px"></canvas><br />
+		<input id="btn9" type="button" value="保存图片" />
+	</body>
+</html>

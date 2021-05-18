@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#cnv
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="tools.js"></script>
+		<script src="ball.js"></script>
+		<script>
+			// 其实就是 变化的速度 与 一个具体的距离 成正比，同时 变化的速度 又 影响着距离；所以距离越远，速度越快，反之越慢。
+			// 缓慢动画：速度 与 距离目标的位置 成正比；加上边界检测。
+			window.onload = function()
+			{
+				var cnv = document.getElementById("cnv");
+				var cxt = cnv.getContext("2d");
+				var ball = new Ball(10,tools.getRandomColor(),cnv.width/2,cnv.height/2);
+				var mouse = tools.getMouse(cnv);
+				var easing = 0.1;
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt.clearRect(0,0,cnv.width,cnv.height);
+					cxt.beginPath();
+					
+					ball.fill(cxt);
+					
+					ball.vx = (mouse.x - ball.x) * easing;
+					ball.vy = (mouse.y - ball.y) * easing;
+					ball.x += ball.vx;
+					ball.y += ball.vy;
+					
+					if(ball.x < ball.r)
+					{
+						ball.x = ball.r;
+						ball.vx *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.x > cnv.width - ball.r)
+					{
+						ball.x = cnv.width - ball.r;
+						ball.vx *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					if(ball.y < ball.r)
+					{
+						ball.y = ball.r;
+						ball.vy *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.y > cnv.height - ball.r)
+					{
+						ball.y = cnv.height - ball.r;
+						ball.vy *= -1;
+						ball.color = tools.getRandomColor();
+					}
+				})();
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="cnv" width="1200px" height="600px"></canvas>
+	</body>
+</html>

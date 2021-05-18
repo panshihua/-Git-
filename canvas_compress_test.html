@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <input type="file" id="upload">
+  <script>
+    // 前端压缩图片，上传到服务端；
+    // 定义一些常量
+    const ACCEPT = ['image/jpg','image/png','image/jpeg'];
+    const MAXSIZE = 1024 * 1024 * 3;
+    const MAXSIZE_STR = '3MB';
+
+    // 将图片转换为base64编码
+    function convertImageToBase64(file,callback) {
+      let reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.addEventListener('load',function(e) {
+        // 获取大图的base64编码，并调用压缩函数；
+        const base64Image = e.target.result
+        callback && callback(base64Image);
+        reader = null
+      })
+      
+    }
+
+    // 压缩从两个维度：尺寸 与 输出的质量；
+    function compress(base64Image,callback) {
+      let maxW = 1024;
+      let maxH = 1024;
+      // 大图呈现出来；
+      const image = new Image()
+      image.src = base64Image
+      document.body.appendChild(image)
+
+      image.addEventListener('load',function(e) {
+        let radio
+        let needCompress = false
+        // 尺寸压缩，确保 图片的尺寸 在规定的范围内；
+        if(maxW < image.naturalWidth) {
+          needCompress = true
+          radio = image.naturalWidth / maxW
+          // 等比例缩小的时候，高度还是超过1024 ，就以高度为准进行等比例缩小；
+          maxH = image.naturalHeight / radio > 1024 ? 1024 : image.naturalHeight / radio
+        }
+        if(maxH < image.naturalHeight) {
+          needCompress = true
+          radio = image.naturalHeight / maxH
+          maxW = image.naturalWidth / radio
+        }
+        // 图片本来很小，就不放大了；
+        if(!needCompress) {
+          maxW = image.naturalWidth;
+          maxH = image.naturalHeight;
+        }
+        console.log(maxW,maxH)
+
+        // 将图片 画在 画布上
+        const canvas = document.createElement('canvas');
+        canvas.setAttribute('id','__compress__');
+        canvas.width = maxW;
+        canvas.height = maxH;
+        canvas.style.visibility = 'hidden';
+        document.body.appendChild(canvas)
+
+        const ctx = canvas.getContext("2d")
+        ctx.clearRect(0,0,maxW,maxH)
+        ctx.drawImage(image,0,0,maxW,maxH);
+
+        // 质量压缩，将 绘制的图片以 base64 的格式 输出出来，输出质量为 0.9 （0~1之间）
+        const compressImage = canvas.toDataURL('image/jpeg',0.9)
+        // 调用 callback，实际上就是 上传到服务器中
+        // 相当于 用canvas 对图片进行了 尺寸压缩 与 质量压缩；然后得到的base64编码 上传到服务器；
+        callback && callback(compressImage)
+        // 之前的canvas删除了，我们可以另外加一个img，将base64 的格式 赋值给 其 src 属性；
+        // 呈现一下压缩后的效果；
+        const _image = new Image();
+        _image.src = compressImage;
+        document.body.appendChild(_image);
+        canvas.remove();
+        // 看一下 压缩比
+        console.log('压缩比：', image.src.length / _image.src.length)
+
+      })
+      
+    }
+
+    // 上传到服务器
+    function uploadToServer(compressImage) {
+      console.log('upload to server...', compressImage)
+    }
+
+    const upload = document.getElementById('upload');
+    upload.addEventListener('change',function(e){
+      const file = e.target.files[0]
+      if(!file) {
+        return;
+      }
+      const {size,type} = file
+      if(!ACCEPT.includes(type)){
+        alert(`不接受 ${type} 类型的文件`)
+        upload.value = ''
+        return
+      }
+      if(MAXSIZE < size){
+        alert(`文件大小超过 ${MAXSIZE_STR}`)
+        upload.value = ''
+        return
+      }
+
+      // 压缩图片，转为base64 的编码；
+      // 得到file对象，用 convertImageToBase64 转码函数得到 大图base64编码；
+      // 调用其内的回调函数，就是压缩函数 compress，将大图的base64编码传递过去；
+      // 在其内 用canvas对这个大图 进行尺寸 与 输出质量的压缩，得到压缩后的 base64编码；
+      // 调用其内的 回调函数，就是上传服务器的函数 uploadToServer，将这个编码 传递过去 进行上传，完活；
+      // 最后，将页面中的DOM全部清除掉，只留下 上传的功能即可；
+      convertImageToBase64(file,(base64Image) => compress(base64Image,uploadToServer));
+    },false)
+
+    
+
+  </script>
+</body>
+</html>

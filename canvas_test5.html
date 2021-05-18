@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#canvas1
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="ball.js"></script>
+		<script src="tools.js"></script>
+		<script>
+			// 随机生成 10个小球，各种运动、碰撞等。
+			// 用原来的球类 新建 球类，颜色随机、生成位置随机、速度数值随机、方向随机；形成一个数组，封装成一个函数；
+			// 创建 10个球 for循环；
+			// 边界检测、碰撞检测、绘图；分别封装成一个函数；再执行绘图操作；
+			// 结构清晰，简单明了，是个典范；尝试 加上 加速度、弹性系数、摩擦力；加上没有问题，注释掉了
+			window.onload = function()
+			{
+				function $$(id)
+				{
+					return document.getElementById(id);
+				}
+				function createBall()
+				{
+					var ball = new Ball(10,tools.getRandomColor());
+					ball.x = Math.random() * (oCanvas1.width - 30) + 15;
+					ball.y = Math.random() * (oCanvas1.height - 30) + 15;
+					ball.vx = Math.random() * 4 - 2;
+					ball.vy = Math.random() * 4 - 2;
+					balls.push(ball);
+				}
+				var oCanvas1 = $$("canvas1");
+				var cxt1 = oCanvas1.getContext("2d");
+				var balls = [];
+				
+				//var speeder = 0.1;
+				//var angle = Math.PI/4;
+				//var bounc_x = 0.5;
+				//var bounc_y = 0.5;
+				
+				// 新建 20个球
+				for(var i=0;i<20;i++)
+				{
+					createBall();
+				}
+				// 边界检测
+				function checkBorder(ball)
+				{
+					if(ball.x < ball.r)
+					{
+						ball.x = ball.r;
+						ball.vx *= -1;
+						//ball.vx *= -bounc_x;
+					}
+					else if(ball.x > oCanvas1.width - ball.r)
+					{
+						ball.x = oCanvas1.width - ball.r;
+						ball.vx *= -1;
+						//ball.vx *= -bounc_x;
+					}
+					if(ball.y < ball.r)
+					{
+						ball.y = ball.r;
+						ball.vy *= -1;
+						//ball.vy *= -bounc_y; 
+					}
+					else if(ball.y > oCanvas1.height - ball.r)
+					{
+						ball.y = oCanvas1.height - ball.r;
+						ball.vy *= -1;
+						//ball.vy *= -bounc_y;
+					}
+				}
+				// 碰撞检测，之所以用这样的参数，是因为 数组的 foreach循环 能够直接 调用这个函数；记住这种方式。
+				function checkCollision(ballA,i)
+				{
+					// 针对当前的小球，只要检测 它后面的小球与它的碰撞  就行，所以初始值 为 i+1;
+					for(var j=i+1;j<balls.length;j++)
+					{
+						var ballB = balls[j];
+						if(tools.checkCircle(ballA,ballB))
+						{
+							ballA.vx *= -1;
+							ballA.vy *= -1;
+							ballB.vx *= -1;
+							ballB.vy *= -1;
+							//ballA.vx *= -bounc_x;
+							//ballA.vy *= -bounc_y;
+							//ballB.vx *= -bounc_x;
+							//ballB.vy *= -bounc_y;
+							// 有一个bug，若检测了发生碰撞后 速度反向，此时若还是在碰撞中，即一次速度叠加未能使他们脱离;
+							// 则根据检测碰撞的程序，他们还要分别反向，这样他们更近了，导致重叠在一块了，bug;
+							// 为了解决这个 bug，防止碰撞的小球重叠，需要在碰撞时分别让他们极速闪开；闪现；
+							if(ballA.vx > 0)
+							{ ballA.x += 5; }
+							else
+							{ ballA.x -= 5; }
+							
+							if(ballA.vy > 0)
+							{ ballA.y += 5; }
+							else
+							{ ballA.y -= 5; }
+							
+							if(ballB.vx > 0)
+							{ ballB.x += 5; }
+							else
+							{ ballB.x -= 5; }
+							
+							if(ballB.vy > 0)
+							{ ballB.y += 5; }
+							else
+							{ ballB.y -= 5; }
+						}
+					}
+				}
+				// 定义 球体的绘制
+				function drawBall(ball)
+				{
+					ball.x += ball.vx;
+					ball.y += ball.vy;
+					ball.fill(cxt1);
+					
+					//ball.vx += speeder * Math.cos(angle);
+					//ball.vy += speeder * Math.sin(angle);
+				}
+				// 绘图
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt1.clearRect(0,0,oCanvas1.width,oCanvas1.height);
+					cxt1.beginPath();
+					// 数组的 foreach 方法，参数为  参数为 ball的函数，与 function(ball) 是等价的；
+					balls.forEach(drawBall);
+					balls.forEach(checkBorder);
+					balls.forEach(checkCollision);
+				})();
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas1" width="1300px" height="600px"></canvas>
+	</body>
+</html>

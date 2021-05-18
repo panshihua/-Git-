@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#cnv
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="tools.js"></script>
+		<script src="ball.js"></script>
+		<script>
+			// 其实就是 变化的速度 与 一个具体的距离 成正比，同时 变化的速度 又 影响着距离；所以距离越远，速度越快，反之越慢。
+			// 弹性动画：加速度 与 距离目标的位置 成正比；加上边界的检测；加上重力因素影响。
+			window.onload = function()
+			{
+				var cnv = document.getElementById("cnv");
+				var cxt = cnv.getContext("2d");
+				var ball = new Ball(10,tools.getRandomColor(),cnv.width/2,cnv.height/2);
+				var mouse = tools.getMouse(cnv);
+				var easing = 0.001;
+				var gravity = 0.1;
+				var ax = 0;
+				var ay = 0;
+				var vx = 0;
+				var vy = 0;
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt.clearRect(0,0,cnv.width,cnv.height);
+					cxt.beginPath();
+					
+					ball.fill(cxt);
+					cxt.strokeStyle = "orange";
+					cxt.moveTo(mouse.x,mouse.y);
+					cxt.lineTo(ball.x,ball.y);
+					cxt.stroke();
+					
+					ax = (mouse.x - ball.x) * easing;
+					ay = (mouse.y - ball.y) * easing;
+					vx += ax;
+					vy += ay;
+					vy += gravity;
+					ball.x += vx;
+					ball.y += vy;
+				    
+					if(ball.x < ball.r)
+					{
+						ball.x = ball.r;
+						vx *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.x > cnv.width - ball.r)
+					{
+						ball.x = cnv.width - ball.r;
+						vx *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					if(ball.y < ball.r)
+					{
+						ball.y = ball.r;
+						vy *= -1;
+						ball.color = tools.getRandomColor();
+					}
+					else if(ball.y > cnv.height - ball.r)
+					{
+						ball.y = cnv.height - ball.r;
+						vy *= -1;
+						ball.color = tools.getRandomColor();
+					}
+				})();
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="cnv" width="1200px" height="600px"></canvas>
+	</body>
+</html>

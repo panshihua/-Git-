@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#cnv
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="tools.js"></script>
+		<script src="line.js"></script>
+		<script src="ellipseBall.js"></script>
+		<script>
+	     // 模仿雨滴落到地面的效果：线条一直向下，到一个最高点时消失，并且在消失的地方出现一个椭圆，椭圆会越来越大，直至消失。
+			// 引入线条 与 椭圆绘制的 JS文件
+			// 新建 线条 与 椭圆的实例化对象，并且添加到相对应的数组中；其中 线条位置、长度、颜色、最高点、速度随机
+			// 椭圆的位置与颜色 与线条有一定的关系，并且他们总是成对出现，共用一个索引；封装成函数。
+		// 新建椭圆激活数组，这个数组用来存放绘制的椭圆：即水滴激活的椭圆；这个数组是独立绘制的，一旦产生就与其他两个数组无关。
+		    // 定义椭圆的扩散速度 与 边框的衰减系数；
+			// 循环新建一定数量的水滴。形成了长度一致的 两个数组：水滴 与 椭圆。
+			// 请求动画帧、清空画布、开始画图：
+			// 对 水滴数组开始 foreach循环：当其高度小于最大高度时，绘图、位置累加；
+			// 否则：将对应水滴的索引作为椭圆数组的索引，找出与相应水滴创建时同时创建的椭圆对象并添加到椭圆激活数组中 
+			// 然后 删除 目标索引下的 水滴对象 与 椭圆对象：因为他们没有用了，而且及时释放了内存、防止内存泄露。
+			// 同时 生成新的水滴，这样就保证 水滴对象 与 椭圆对象 总是成对出现，成对消失。
+			// 椭圆激活数组 就是在 相应水滴到达最高处时产生的，产生之后，它的绘制是独立过程
+			// 椭圆激活数组的foreach循环，当椭圆的边框宽度大于边界值时，绘制该椭圆；
+			// 随着 椭圆边框的衰减，达到边界值时，在该数组中 删除该对象，防止内存泄露。
+			window.onload = function()
+			{
+				var cnv = document.getElementById("cnv");
+				var cxt = cnv.getContext("2d");
+				function createLine()
+				{
+					var x = Math.random() * (cnv.width - 10) + 5;
+					var y = Math.random() * 10;
+					var length = Math.random() * 20 + 5;
+					var color = "deepskyblue";
+					var max_height = Math.random() * 100 + 490;
+					var line = new Line(x,y,length,color);
+					line.vy = Math.random() * 2 + 9;
+					line.max_height = max_height;
+					var eball = new eBall(x,max_height,10,5,color);
+					lines.push(line);
+					eballs.push(eball);
+				}
+				var lines = [];
+				var eballs = [];
+				var actives = [];
+				var v_eball = 0.5;
+				var easing = 0.99;
+				for(var i=0;i<10;i++)
+				{
+					createLine();
+				}
+				
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt.clearRect(0,0,cnv.width,cnv.height);
+					cxt.beginPath();
+					cxt.fillStyle = "black";
+					cxt.fillRect(0,0,cnv.width,cnv.height);
+					
+					lines.forEach(function(line,i)
+					{
+						if((line.y + line.length) < line.max_height)
+						{
+							line.stroke(cxt);
+							line.y += line.vy;
+						}
+						else
+						{
+							actives.push(eballs[i]);
+							lines.splice(i,1);
+							eballs.splice(i,1);
+							createLine();
+						}
+					});
+					actives.forEach(function(eball,i)
+					{
+						if(eball.lineWidth > 0.1)
+						{
+							eball.stroke(cxt);
+							eball.radiusX += v_eball;
+							eball.radiusY += v_eball;
+							eball.lineWidth *= easing;
+						}
+						else
+						{
+							actives.splice(i,1);
+						}
+					});
+				})();
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="cnv" width="1300px" height="800px"></canvas>
+	</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script>
+			window.onload = function()
+			{
+				function getId(id)
+				{
+					return document.getElementById(id);
+				}
+				//Canvas 又称画布，Canvas技术 指使用Canvas元素结合JS来绘制各种图形的技术；
+				//可以绘制图形、绘制图表、动画效果、游戏开发等操作
+				// Canvas 元素框体的区域，左上角为原点，y轴正向是向下的；
+				//总之就是 获取点位，画出来；
+				var oCanvas1 = getId("canvas1");               //获取Canvas元素;
+				var cxt1 = oCanvas1.getContext("2d");          //获取上下文环境对象 Context 
+				cxt1.moveTo(10,10);                       //开始绘制图形，此为绘制起点，坐标 10，10
+				cxt1.lineTo(100,10);                      //连接第二点，依次向下连接
+				cxt1.lineTo(10,50);
+				cxt1.lineTo(100,50);
+				cxt1.strokeStyle = "aqua";                //绘制的线条的颜色设置
+				cxt1.stroke();                            //前面只是给出了坐标，这个才是绘画的执行
+				
+				var oCanvas2 = getId("canvas2");
+				var cxt2 = oCanvas2.getContext("2d");
+				cxt2.strokeStyle = "coral";               //绘制的线条的颜色设置-------通用做法
+				cxt2.fillStyle = "chartreuse";            //绘制的区域 填充的颜色设置-------通用做法
+				cxt2.rect(20,20,200,100);                 //绘制矩形，参数为 左上角坐标，宽度和高度
+				cxt2.stroke();                            //绘画执行，-------通用做法
+				cxt2.fill();                              //填充执行，-------通用做法
+				
+				var oCanvas3 = getId("canvas3");
+				var cxt3 = oCanvas3.getContext("2d");
+				cxt3.strokeStyle = "red";
+				cxt3.strokeRect(50,50,200,50);            //直接绘制矩形，仅限矩形的绘制
+				cxt3.fillStyle = "#ADFF2F";
+				cxt3.fillRect(20,20,50,50);               //直接填充矩形，仅限矩形的填充
+				cxt3.clearRect(50,50,20,20);              //清空矩形区域。仅限矩形的清空
+				
+				var oCanvas4 = getId("canvas4");
+				var cxt4 = oCanvas4.getContext("2d");
+				cxt4.moveTo(40,60);         //若绘制特定形状的多边形，没有规律可言，就是计算出每个点位的坐标，连起来即可
+				cxt4.lineTo(100,60);
+				cxt4.lineTo(100,30);
+				cxt4.lineTo(150,75);
+				cxt4.lineTo(100,120);
+				cxt4.lineTo(100,90);
+				cxt4.lineTo(40,90);
+				cxt4.lineTo(40,60);
+				cxt4.stroke();              //绘画执行
+				
+				function createPolygon(cxt,n,dx,dy,size,offset)
+				{
+					//绘制正多边形，需要提供参数：cxt对象、边数、中心点位坐标、中心点与角的距离(size)、逆时针旋转的度数
+					var degree = Math.PI * 2 / n;     //正n边形每一个边对应的中心角的角度
+					cxt.beginPath();                  //开始一条新路径
+					for(var i=0;i<n;i++)
+					{
+						//得到一个确切的角度后，算出余弦，乘以斜边，加上中心点位坐标，获取 x 值
+						var x = Math.cos(offset + i * degree) * size + dx;
+						var y = Math.sin(offset + i * degree) * size + dy;   //计算每一个角的坐标
+						cxt.lineTo(x,y);              //确定点位
+					}
+					cxt.closePath();                  //关闭路径
+					cxt.stroke();
+					cxt.fill();
+				}
+				var oCanvas5 = getId("canvas5");
+				var cxt5 = oCanvas5.getContext("2d");
+				cxt5.strokeStyle = "coral";
+				cxt5.fillStyle = "cyan"
+				createPolygon(cxt5,3,150,75,50,0);
+				
+				var oCanvas6 = getId("canvas6");
+				var cxt6 = oCanvas6.getContext("2d");
+				cxt6.strokeStyle = "coral";
+				cxt6.fillStyle = "cyan"
+				cxt6.beginPath();
+				for(var i=0;i<5;i++)
+				{
+					//五角星 得到一个确切的角度后，除以180 乘以 PI ，算出余弦，乘以斜边，加上中心点位坐标，获取 x 值
+					var x = Math.cos((18 + i * 72)/180 * Math.PI) * 50 + 100;
+					var y = -Math.sin((18 + i * 72)/180 * Math.PI) * 50 + 75;
+					cxt6.lineTo(x,y);
+					var x1 = Math.cos((54 + i * 72)/180 * Math.PI) * 25 + 100;
+					var y1 = -Math.sin((54 + i * 72)/180 * Math.PI) * 25 + 75;
+					cxt6.lineTo(x1,y1);
+				}
+				cxt6.closePath();
+				cxt6.stroke();
+				cxt6.fill();
+				
+				var oCanvas7 = getId("canvas7");
+				var cxt7 = oCanvas7.getContext("2d");
+				cxt7.strokeStyle = "#ADFF2F";
+				cxt7.fillStyle = "aliceblue";
+				var size = 25 / Math.sin(36/180*Math.PI);
+				createPolygon(cxt7,5,100,100,size,60);
+				
+				var oCanvas8 = getId("canvas8");
+				var cxt8 = oCanvas8.getContext("2d");
+				for(var i=0;i<8;i++)
+				{
+					for(var j=0;j<8;j++)
+					{
+						cxt8.fillStyle = "rgb(" + Math.floor(255 - i * 31.9) + "," + 
+						Math.floor(255 - j * 31.9) + "," + "0)";
+						cxt8.fillRect(i*25,j*25,25,25);               //方格调色板
+					}
+				}
+				
+				var oCanvas9 = getId("canvas9");
+				var cxt9 = oCanvas9.getContext("2d");
+				var r = 255,g = 0,b = 0;
+				for(var i=0;i<150;i++)
+				{
+					if(i<25)
+					{
+						g+=10;
+					}
+					else if(i>25 && i<50)
+					{
+						r-=10;
+					}
+					else if(i>50 && i<75)
+					{
+						g-=10;
+						b+=10;
+					}
+					else if(i>=75 && i<100)
+					{
+						r+=10;
+					}
+					else
+					{
+						b-=10;
+					}
+					cxt9.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+					cxt9.fillRect(3*i,0,3,oCanvas9.height);           //渐变调色板
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<!-- canvas 为行内块元素，一般有三个属性，id width height  style属性也要在元素中定义，否则不起作用-->
+		<canvas id="canvas1" width="200" height="100" style="border: 2px dashed #ADFF2F;"></canvas>
+		
+		<canvas id="canvas2" width="300" height="150" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas3" width="300" height="150" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas4" width="300" height="150" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas5" width="300" height="150" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas6" width="300" height="150" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas7" width="200" height="200" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas8" width="200" height="200" style="border: 3px solid firebrick;"></canvas>
+		
+		<canvas id="canvas9" width="400" height="200" style="border: 3px solid firebrick;"></canvas>
+	</body>
+</html>
+

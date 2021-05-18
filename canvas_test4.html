@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#canvas1
+			{
+				border: 2px solid orange;
+			}
+		</style>
+		<script src="tools.js"></script>
+		<script src="box.js"></script>
+		<script>
+			// 俄罗斯 方块 简易版 
+			window.onload = function()
+			{
+				function $$(id)
+				{
+					return document.getElementById(id);
+				}
+				
+				function createRect()
+				{
+					// 创建一个新的 盒子，左上角x坐标随机、宽高随机；将盒子添加到数组中；返回这个新建的盒子；
+					var x = Math.random() * (oCanvas1.width - 40);
+					var y = 0;
+					var width = Math.random() * 40 + 20;
+					var height = Math.random() * 40 + 20;
+					// 盒子 实例化对象，参数分别为：左上角坐标、宽、高、颜色；
+					var box = new Box(x,y,width,height,tools.getRandomColor());
+					boxs.push(box);
+					return box;
+				}
+				var oCanvas1 = $$("canvas1");
+				var cxt1 = oCanvas1.getContext("2d");
+				var boxs = [];
+				var activeBox = createRect();
+				var vy = 2;
+				
+				var key = tools.getKey();
+				//监听 keydown 事件，使盒子能够 左、右、下 移动；
+				window.addEventListener("keydown",function(){
+					switch(key.direction){
+						case "down":{
+							activeBox.y += 10;
+							break;
+						}
+						case "left":{
+							activeBox.x -= 5;
+							break;
+						}
+						case "right":{
+							activeBox.x += 5;
+							break;
+						}
+					}
+				},false);
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt1.clearRect(0,0,oCanvas1.width,oCanvas1.height);
+					cxt1.beginPath();
+					// 运动的盒子 y坐标 会累加；源动力；
+					activeBox.y += vy;
+					
+					// 对运动的盒子 ：可能遇到的边界 或 其他固定的盒子 进行碰撞检测。
+					// 检测到 盒子到了底部，则将其固定在底部；同时 生成一个新的盒子-----边界检测
+					if(activeBox.y > oCanvas1.height - activeBox.height)
+					{ 
+						activeBox.y = oCanvas1.height - activeBox.height; 
+						activeBox = createRect();
+					}
+					// 检测 盒子 到了左边界，固定其 x 坐标
+					if(activeBox.x < 0)
+					{
+						activeBox.x = 0;
+					}
+					// 检测 盒子 到了右边界，固定其 x 坐标
+					if(activeBox.x > oCanvas1.width - activeBox.width)
+					{
+						activeBox.x = oCanvas1.width - activeBox.width;
+					}
+					// 对数组中的盒子 进行遍历，检测 运动的盒子 与 已经固定了的盒子的碰撞-----碰撞检测
+					// 若发生碰撞，则 固定运动的盒子；同时生成一个新的盒子；
+					boxs.forEach(function(box)
+					{
+						if(activeBox != box && tools.checkRect(activeBox,box))
+						{
+							activeBox.y = box.y - activeBox.height;
+							activeBox = createRect();
+						}
+						// 最后每个盒子进行绘制，包括 那个运动的盒子------------------------- 绘图
+						box.fill(cxt1)
+					});
+					
+				})();
+				
+				
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas1" width="1300px" height="600px"></canvas>
+	</body>
+</html>

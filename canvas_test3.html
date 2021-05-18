@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			#canvas1,#canvas2,#canvas3,#canvas4,#canvas5,#canvas6,#canvas7,#canvas8,#canvas9,#canvas10,#canvas11,
+			#canvas12,#canvas13,#canvas14
+			{
+				border: 2px solid orange ;
+			}
+		</style>
+		<!-- 引入外部的js文件 ，该文件为专门存放各种公用代码，特定方法兼容各种浏览器的代码分别封装到工具函数tools中-->
+		<script src="tools.js"></script>
+		<script src="arrow.js"></script>
+		<script src="ball.js"></script>
+		<script src="ellipseBall.js"></script>
+		<script src="edgeDetection.js"></script>
+		<script>
+			function $$(id)
+			{
+				// 将通过id获取DOM对象的方法 封装成一个函数
+				return document.getElementById(id);
+			}
+			window.onload = function()
+			{
+				var oCanvas1 = $$("canvas1");
+				var cxt1 = oCanvas1.getContext("2d");
+				
+				var oText1 = $$("text1");
+				//调用外部js文件中的tools对象，获取key为 getMouse的值，值为函数形式，需要参数 DOM对象，并且返回一个对象；
+				//获取鼠标对象，其中的键值对为 鼠标在 DOM 对象上的相对位置；
+				var mouse = tools.getMouse(oCanvas1);
+				
+				oCanvas1.addEventListener("mousemove", function(){
+					oText1.innerText = "鼠标当前坐标为：(" + mouse.x + "," + mouse.y + ")";
+				},false);
+				oCanvas1.addEventListener("mouseleave",function(){
+					oText1.innerText = "";
+				},false);
+				
+				
+				
+				var oCanvas2 = $$("canvas2");
+				var cxt2 = oCanvas2.getContext("2d");
+				
+				function drawBall(x,y)
+				{
+					//绘制原始球体的方法 封装为一个函数，只需提供圆心坐标即可重复绘制，方便重复调用
+					cxt2.beginPath();
+					cxt2.fillStyle = "#FFA500";
+					cxt2.arc(x,y,20,0,360*Math.PI/180);
+					cxt2.fill();
+				}
+				drawBall(oCanvas2.width/2,oCanvas2.height/2);
+				//调用外部js文件中的tools对象，获取key为 getKey的值，值为函数形式，并且返回一个对象；
+				//获取键盘方向对象，键值对为 方向 与 方向值。
+				var key = tools.getKey();
+				var x = 200;
+				var y = 200;
+				window.addEventListener("keydown",function(){
+					//图形重绘的前提：先清空
+					cxt2.clearRect(0,0,oCanvas2.width,oCanvas2.height);
+					switch(key.direction){
+						case "up":{
+							y -= 20;
+							drawBall(x,y);
+							break;
+						}
+						case "right":{
+							x += 20;
+							drawBall(x,y);
+							break;
+						}
+						case "down":{
+							y += 20;
+							drawBall(x,y);
+							break;
+						}
+						case "left":{
+							x -= 20;
+							drawBall(x,y);
+							break;
+						}
+						default:{
+							drawBall(x,y);
+						} 
+					}
+				},false);
+				
+				
+				
+				var oCanvas3 = $$("canvas3");
+				var cxt3 = oCanvas3.getContext("2d");
+				
+				var x1 = 0;
+				var y1 = 0;
+				var directionX = true;
+				var directionY = true;
+				var colors = ["red","orange","yellow","green","blue","navy","purple"];
+				var i = 0;
+		//请求动画帧率，会自动根据浏览器绘制的帧率进行调整，在其中进行位置调整即可 , 整体的格式要记住：
+		// (function frame(){ window.requestAnimationFrame(frame); cxt3.clearRect(); 绘画；位置的变化；})();
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt3.clearRect(0,0,oCanvas3.width,oCanvas3.height);
+					cxt3.beginPath();
+					cxt3.fillStyle = colors[i];
+					cxt3.arc(x1,y1,50,0,360*Math.PI/180);
+					cxt3.fill();
+					
+					//判断超出边界，方向反向；并且颜色值变化一种
+					if(x1 > oCanvas3.width)
+					{
+						directionX = false;
+						i++;
+						i %= colors.length;
+					}
+					if(x1 < 0)
+					{ 
+						directionX = true; 
+						i++;
+						i %= colors.length;
+					}
+					
+					if(y1 > oCanvas3.height)
+					{
+						directionY = false;
+						i++;
+						i %= colors.length;
+					}
+					if(y1 < 0)
+					{
+						directionY = true;
+						i++;
+						i %= colors.length;
+					}
+					//判断方向，相应横纵坐标 进行累加累减
+					if(directionX)
+					{
+						x1 += 4;
+					}
+					else
+					{
+						x1 -= 6;
+					}
+					if(directionY)
+					{
+						y1 += 8;
+					}
+					else
+					{
+						y1 -= 10;
+					}
+					
+				})();
+				// 动画的本质 就是 clearRect() 方法 “清除”整个 canvas ；
+				// 然后 requestAnimationFrame() 方法 实现 “重绘”。
+				
+				//三角函数 与 反三角函数：
+				//三角函数：sin(a): Math.sin(a * Math.PI/180);  计算正弦：先算出具体弧度，再调用 Math.sin()方法。
+				//反三角函数：arctan(y/x): Math.atan2(y,x) * 180/Math.PI; 计算反正切，先算出具体弧度，再转化成角度。
+				
+				var oCanvas4 = $$("canvas4");
+				var cxt4 = oCanvas4.getContext("2d");
+				var speed_arrow = 1;
+				var angle_arrow = 0;
+				var dx = 0;
+				var dy = 0;
+				var arrow = new Arrow(oCanvas4.width/2,oCanvas4.height/2);
+				var mouse1 = new tools.getMouse(oCanvas4);
+				// 实例化一个对象，传递参数
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt4.clearRect(0,0,oCanvas4.width,oCanvas4.height);
+					//进行动画绘制，每次都先 清空画布
+					dx = mouse1.x - oCanvas4.width/2;
+					dy = mouse1.y - oCanvas4.height/2;
+					//获得 鼠标相对于图形中心的偏移值
+					arrow.angle = Math.atan2(dy,dx);
+					//根据偏移值 计算箭头需要旋转的角度，并赋值于 相应实例化对象的相应属性；
+					arrow.fill(cxt4);
+					//画图；
+					
+				})();
+				
+				
+				var oCanvas5 = $$("canvas5");
+				var cxt5 = oCanvas5.getContext("2d");
+				var oText2 = $$("text2");
+				var mouse2 = tools.getMouse(oCanvas5);
+				//整个一套流程：请求动画帧、清空画布、保存状态、变形、画、恢复状态；
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt5.clearRect(0,0,oCanvas5.width,oCanvas5.height);
+					cxt5.save();
+					cxt5.beginPath();
+					cxt5.strokeStyle = "red";
+					cxt5.moveTo(oCanvas5.width/2,oCanvas5.height/2);
+					cxt5.lineTo(mouse2.x,mouse2.y);
+					cxt5.stroke();
+					cxt5.restore();
+					var dx = mouse2.x - oCanvas5.width/2;
+					var dy = mouse2.y - oCanvas5.height/2;
+					oText2.innerText = "鼠标点位与画布中心点位的距离为：" + Math.sqrt(dx*dx + dy*dy);
+				})();
+				
+				
+				var oCanvas6 = $$("canvas6");
+				var cxt6 = oCanvas6.getContext("2d");
+				var x2 = 250;
+				var y2 = 200;
+				var r = 150;
+				var radiusX = 150;
+				var radiusY = 100;
+				var angle1 = 0;
+				var angle2 = 0;
+				var ball = new Ball(10,"orangered");
+				var circle = new Ball(150,"gray",x2,y2);
+				var eball_new = new eBall(x2,y2,radiusX,radiusY,"gray");
+				var ball1_new = new Ball(10,"purple");
+				//对于要重复画的图形 ，单独写一个js文件，引入进来；
+				//先定义各种参数值
+				// 实例化各种对象，将已经赋值的参数带上
+				//请求动画帧、清空画布、开始画(执行、获取位置参数再执行)、动画变量的累加(这个是动画循环的原动力)。
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt6.clearRect(0,0,oCanvas6.width,oCanvas6.height);
+					cxt6.beginPath();
+					// 小球的圆周运动 
+					circle.stroke(cxt6);
+					ball.x = Math.cos(angle1*Math.PI/180) * r + x2;
+					ball.y = Math.sin(angle1*Math.PI/180) * r + y2;
+					ball.fill(cxt6);
+					// 小球的 椭圆 的圆周运动
+					eball_new.stroke(cxt6);
+					ball1_new.x = Math.cos(angle2*Math.PI/180) * radiusX + x2;
+					ball1_new.y = Math.sin(angle2*Math.PI/180) * radiusY + y2;
+					ball1_new.fill(cxt6);
+					
+					angle1 += 1;
+					angle2 += 1.5;
+				})();
+				
+				
+				var oCanvas7 = $$("canvas7");
+				var cxt7 = oCanvas7.getContext("2d");
+				var x3 = 200;
+				var y3 = 200;
+				var radiusX1 = 150;
+				var radiusY1 = 100;
+				var angle3 = 0;
+				
+				var eball = new eBall(x3,y3,radiusX1,radiusY1,"gray");
+				var ball1 = new Ball(10,"purple");
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt7.clearRect(0,0,oCanvas7.width,oCanvas7.height);
+					cxt7.beginPath();
+					// 小球椭圆的圆周运动
+					eball.stroke(cxt7);
+					ball1.x = Math.cos(angle3*Math.PI/180) * radiusX1 + x3;
+					ball1.y = Math.sin(angle3*Math.PI/180) * radiusY1 + y3;
+					ball1.fill(cxt7);
+					
+					angle3 += 1;
+					
+				})();
+				//这种模式很好：将经常要画的图形 封装成一个JS文件；在HTML文件中引入该外部JS文件；参看外部的JS文件。
+				//将各种参数赋值；并且 将引入的对象实例化，将参数带入: 通过 new 新建对象，使对象实例化。
+				//请求动画帧、清空画布、开始画 或者 确定位置参数开始画、动画位置变量的累加(这个是动画循环的原动力)。
+				
+				var oCanvas8 = $$("canvas8");
+				var cxt8 = oCanvas8.getContext("2d");
+				var radius = 150;
+				var radiusBall1 = 1;
+				var angle4 = 0;
+				var ball2 = new Ball(10,"red",oCanvas8.width/2,oCanvas8.height/2);
+				var ball3 = new Ball(10,"yellow",oCanvas8.width/2,oCanvas8.height/2);
+				// 小球的 横纵坐标的正余弦运动
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt8.clearRect(0,0,oCanvas8.width,oCanvas8.height);
+					cxt8.beginPath();
+					ball2.x = oCanvas8.width/2 + Math.sin(angle4*Math.PI/180) * radius;
+					ball2.scaleX = 2 + Math.sin(angle4*Math.PI/180) * radiusBall1;
+					ball2.scaleY = 2 + Math.sin(angle4*Math.PI/180) * radiusBall1;
+					ball2.fill(cxt8);
+					ball3.y = oCanvas8.height/2 + Math.cos(angle4*Math.PI/180) * radius;
+					ball3.scaleX = 2 + Math.sin(angle4*Math.PI/180) * radiusBall1;
+					ball3.scaleY = 2 + Math.sin(angle4*Math.PI/180) * radiusBall1;
+					ball3.fill(cxt8);
+					angle4 += 1;
+				})();
+				
+				
+				
+				var oCanvas9 = $$("canvas9");
+				var cxt9 = oCanvas9.getContext("2d");
+				var radiusY2 = 100;
+				var x4 = 10;
+				var VX = 5;
+				var colors1 = ["red","orange","yellow","green","blue","navy","purple"];
+				var j = 0;
+				var ball4 = new Ball(10,"red");
+				//小球在 横坐标上的 正弦运动
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt9.clearRect(0,0,oCanvas9.width,oCanvas9.height);
+					cxt9.beginPath();
+					ball4.x = x4;
+					ball4.y = oCanvas9.height/2 + Math.sin(x4*Math.PI/180) * radiusY2;
+					ball4.color = colors1[j];
+					ball4.fill(cxt9);
+					// 边界反弹
+					if(x4 > oCanvas9.width - ball4.r)
+					{
+						VX *= -1;
+						j += 1;
+						j %= colors1.length;
+					}
+					else if(x4 < ball4.r)
+					{
+						VX *= -1;
+						j += 1;
+						j %= colors1.length;
+					}
+					
+					x4 += VX;
+					
+				})();
+				
+				// 小球的 缩放 脉冲运动
+				var oCanvas10 = $$("canvas10");
+				var cxt10 = oCanvas10.getContext("2d");
+				var radiusBall = 1;
+				var angle5 = 0;
+				var ball5 = new Ball(20,"orange");
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt10.clearRect(0,0,oCanvas10.width,oCanvas10.height);
+					cxt10.beginPath();
+					ball5.scaleX = 2 + Math.sin(angle5*Math.PI/180) * radiusBall;
+					ball5.scaleY = 2 + Math.sin(angle5*Math.PI/180) * radiusBall;
+					ball5.x = oCanvas10.width/2;
+					ball5.y = oCanvas10.height/2;
+					ball5.fill(cxt10);
+					angle5 += 1;
+				})();
+				
+				
+				
+				// 小球的匀速运动，碰到边界就返回 
+				var oCanvas11 = $$("canvas11");
+				var cxt11 = oCanvas11.getContext("2d");
+				var speed = 5;
+				var angle6 = Math.PI/5;
+				var x6 = 10;
+				var y6 = 10;
+				var angle7 = Math.PI/6;
+				var x7 = 30;
+				var y7 = 50;
+				var angle8 = Math.PI/4;
+				var x8 = 300;
+				var y8 = 100;
+				var angle9 = Math.PI/3;
+				var x9 = 350;
+				var y9 = 300;
+				var angle10 = Math.PI/7;
+				var x10 = 50;
+				var y10 = 300;
+				var colors2 = ["red","orange","yellow","green","blue","navy","purple"];
+				//小球对象实例化，5个
+				var ball6 = new Ball(10,"red");
+				var ball7 = new Ball(11,"orange");
+				var ball8 = new Ball(12,"yellow");
+				var ball9 = new Ball(13,"green");
+				var ball10 = new Ball(14,"purple");
+				// 5个小球分别的位置 与 颜色；该文件包含了 边界检测的位置确定
+				var position = new getPosition(x6,y6,oCanvas11,speed,angle6,ball6.r,colors2);
+				var position1 = new getPosition(x7,y7,oCanvas11,speed,angle7,ball7.r,colors2);
+				var position2 = new getPosition(x8,y8,oCanvas11,speed,angle8,ball8.r,colors2);
+				var position3 = new getPosition(x9,y9,oCanvas11,speed,angle9,ball9.r,colors2);
+				var position4 = new getPosition(x10,y10,oCanvas11,speed,angle10,ball10.r,colors2);
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt11.clearRect(0,0,oCanvas11.width,oCanvas11.height);
+					cxt11.beginPath();
+					//每个小球的画图实现
+					drawball(ball6,position,colors2,cxt11);
+					drawball(ball7,position1,colors2,cxt11);
+					drawball(ball8,position2,colors2,cxt11);
+					drawball(ball9,position3,colors2,cxt11);
+					drawball(ball10,position4,colors2,cxt11);
+					
+					//每个小球位置变化的功能实现，给第一个 添加一个 加速度 与 速度损耗；以及摩擦力；
+					position.acceleration = 2;
+					position.angle_acc = Math.PI/2;
+					position.bounce_x = 0.5;
+					position.bounce_y = 0.5;
+					position.friction_x = 0.95;
+					position.get_position();
+					position1.get_position();
+					position2.get_position();
+					position3.get_position();
+					position4.get_position();
+					
+					function drawball(ball,position,colors,cxt)
+					{
+						ball.x = position.x;
+						ball.y = position.y;
+						ball.color = colors[position.i];
+						ball.fill(cxt);
+					}
+				})();
+				
+				
+				// 模拟小球在重力环境中的运动轨迹，检测边界，碰到就反向，并且有速度损耗
+				// 参数分别为：球体位置、颜色、速度、速度方向、加速度、加速度方向、垂直弹性系数、水平弹性系数、摩擦系数
+                // 球体对象的实例化、获取球体位置对象的实例化 
+				var oCanvas12 = $$("canvas12");
+				var cxt12 = oCanvas12.getContext("2d");
+				var x11 = 20;
+				var y11 = 20;
+				var colors3 = ["red","orange","yellow","green","blue","navy","purple"];
+				var speed1 = 10;
+				var angle11 = Math.PI/4;
+				var accelerate = 0.02;
+				var acc_arc = Math.PI/2;
+				var bounce_y = 0.8;
+				var bounce_x = 0.9;
+				var friction_x = 0.9;
+				var friction_y = 0.95;
+				var ball11 = new Ball(10,"red");
+				var position5 = new getPosition(x11,y11,oCanvas12,speed1,angle11,ball11.r,colors3);
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt12.clearRect(0,0,oCanvas12.width,oCanvas12.height);
+					cxt12.beginPath();
+					// 画球体，用的是 位置获取对象的参数；
+					ball11.x = position5.x;
+					ball11.y = position5.y;
+					ball11.color = colors3[position5.i]
+					ball11.fill(cxt12);
+					// 设置 获取位置对象的 属性：加速度、加速度角度、垂直弹性系数、水平弹性系数、摩擦系数；
+					// 执行获取位置对象的方法。
+					position5.acceleration = accelerate;
+					position5.angle_acc = acc_arc;
+					position5.bounce_y = bounce_y;
+					position5.bounce_x = bounce_x;
+					position5.friction_x = friction_x;
+					position5.friction_y = friction_y;
+					position5.get_gravity_position();
+				})();	
+				
+				// 边界环绕的小球 
+				var oCanvas13 = $$("canvas13");
+				var cxt13 = oCanvas13.getContext("2d");
+				var angle_x = 0;
+				var radius_y = 150;
+				var colors_4 = ["red","orange","yellow","green","blue","navy","purple"];
+				var k = 0;
+				var ball_13 = new Ball(10,"red");
+				
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt13.clearRect(0,0,oCanvas13.width,oCanvas13.height);
+					cxt13.beginPath();
+					ball_13.x = angle_x;
+					ball_13.y = oCanvas13.height/2 + Math.sin(angle_x*Math.PI/180) * radius_y;
+					ball_13.color = colors_4[k];
+					ball_13.fill(cxt13);
+					
+					angle_x += 5;
+					// 边界环绕
+					if(angle_x > oCanvas13.width + ball_13.r)
+					{
+						angle_x = -ball_13.r;
+						k++;
+						k %= colors_4.length;
+					}
+				})();
+				
+				
+				// 创建 50个小球的数组，设置随机速度，边界生成，模仿喷泉的画面效果。
+				var oCanvas14 = $$("canvas14");
+				var cxt14 = oCanvas14.getContext("2d");
+				var balls = [];
+				var n = 50;
+				var gravity = 0.3;
+				for (var i=0;i<n;i++)
+				{
+					// 实例化一个小球对象，颜色参数 为 调用的工具参数：可随机获取一种颜色。
+					var ball_14 = new Ball(10,tools.getRandomColor(),oCanvas14.width/2,oCanvas14.height * 4 / 5);
+					ball_14.vx = (Math.random() * 2 - 1) * 100;
+					ball_14.vy = - (Math.random() * 100);
+					balls.push(ball_14);
+					// 定义小球对象的两个属性 vx、vy 分别表示小球横向运动的速度 与 纵向运动的速度；
+					// 数值随机、正负随机，自然 就 角度随机；添加到 balls 数组中。
+				}
+				(function frame(){
+					window.requestAnimationFrame(frame);
+					cxt14.clearRect(0,0,oCanvas14.width,oCanvas14.height);
+					cxt14.beginPath();
+					// 用 数组的 foreach 方法，遍历数组 balls,记住这种方法！！
+					balls.forEach(function(ball)
+					{
+						ball.fill(cxt14);
+						//先确定画图的框架
+						ball.x += ball.vx;
+						ball.y += ball.vy;
+						ball.vy += gravity;
+						//再确定 图形的位置
+						
+						if(ball.x < -ball.r || 
+						ball.x > oCanvas14.width + ball.r ||
+						ball.y < -ball.r ||
+						ball.y > oCanvas14.height + ball.r)
+						{
+							ball.x = oCanvas14.width/2;
+							ball.y = oCanvas14.height * 4 / 5;
+							ball.vx = (Math.random() * 2 - 1) * 10;
+							ball.vy = - (Math.random() * 20);
+						} 
+						// 再确定 引起位置变化 的变量 的 数值；一层一层往下表示，直到源头变量出现，这是动画循环的原动力。
+					});
+				})();
+				//边界检测操作：边界限制：检测到达边界后，将位置固定在那一处；
+				//边界生成：检测完全出了边界后，重新生成在 刚开始出现的地方；(一般为中心点)
+				//边界环绕：检测完全出了边界后，重新生成在 刚开始出现的地方；(一般为边界处)
+				//边界反弹，检测到达边界后，将对应的速度 置为 反向；
+				
+				
+			}
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas1" width="400px" height="400px"></canvas>
+		<canvas id="canvas2" width="400px" height="400px"></canvas>
+		<canvas id="canvas3" width="500px" height="400px"></canvas>
+		<p id="text1"></p>
+		<canvas id="canvas4" width="400px" height="400px"></canvas>
+		<canvas id="canvas5" width="400px" height="400px"></canvas>
+		<canvas id="canvas6" width="500px" height="400px"></canvas>
+		<p id="text2"></p>
+		<canvas id="canvas7" width="400px" height="400px"></canvas>
+		<canvas id="canvas8" width="400px" height="400px"></canvas>
+		<canvas id="canvas9" width="500px" height="400px"></canvas>
+		<canvas id="canvas10" width="400px" height="400px"></canvas>
+		<canvas id="canvas11" width="400px" height="400px"></canvas>
+		<canvas id="canvas12" width="500px" height="400px"></canvas>
+		<canvas id="canvas13" width="400px" height="400px"></canvas>
+		<canvas id="canvas14" width="400px" height="400px"></canvas>
+	</body>
+</html>
